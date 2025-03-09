@@ -1,25 +1,34 @@
 #include <iostream>
 #include <vector>
+#include <numeric>
 
 class Solution {
 public:
-    int combinationSum4(std::vector<int>& nums, int target) {
-        std::vector<unsigned int> dp(target + 1, 0);
-        dp[0] = 1;
+    int findTargetSumWays(std::vector<int>& nums, int target) {
+        int totalSum = std::accumulate(nums.begin(), nums.end(), 0);
+        std::vector<int> dp(2 * totalSum + 1, 0);
 
-        for (int i = 1; i <= target; i++) {
-            for (int num : nums) {
-                if (i >= num) {
-                    dp[i] += dp[i - num];
+        dp[nums[0] + totalSum] = 1;
+        dp[-nums[0] + totalSum] += 1;
+
+        for (int index = 1; index < nums.size(); index++) {
+            std::vector<int> next(2 * totalSum + 1, 0);
+            for (int sum = -totalSum; sum <= totalSum; sum++) {
+                if (dp[sum + totalSum] > 0) {
+                    next[sum + nums[index] + totalSum] += dp[sum + totalSum];
+                    next[sum - nums[index] + totalSum] += dp[sum + totalSum];
                 }
             }
+            dp = next;
         }
-        return dp[target];
+
+        return std::abs(target) > totalSum ? 0 : dp[target + totalSum];
     }
 };
 
 int main() {
     int n, target;
+    
     std::cout << "Enter number of elements: ";
     std::cin >> n;
 
@@ -33,7 +42,7 @@ int main() {
     std::cin >> target;
 
     Solution solution;
-    int result = solution.combinationSum4(nums, target);
+    int result = solution.findTargetSumWays(nums, target);
 
     std::cout << "Output: " << result << std::endl;
 
